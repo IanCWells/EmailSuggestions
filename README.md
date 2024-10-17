@@ -2,13 +2,11 @@
 Chrome Extension for Writing Quick Email Suggestions
 
 Usage:
-1. Replace
+1. Replace your API key.  To get an API key: https://platform.openai.com/api-keys
 
 ```javascript
 const apiKey = "sk-YOURAPIKEY";
 ```
-
-with your API key.
 
 2. In chrome, navigate to chrome://extensions/
    
