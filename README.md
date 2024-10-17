@@ -2,9 +2,13 @@
 Chrome Extension for Writing Quick Email Suggestions
 
 Usage:
-1. Replace ```javascript
+1. Replace
+
+```javascript
 const apiKey = "sk-YOURAPIKEY";
-``` with your API key.
+```
+
+with your API key.
 
 2. In chrome, navigate to chrome://extensions/
    
