@@ -12,7 +12,11 @@ document.getElementById("expandButton").addEventListener("click", async () => {
   console.log("Scraped Content:", scrapedContent);
 
   // Generate the email response asynchronously
-  const generatedResponse = await generateEmailResponse(scrapedContent);
+  const generatedResponse = await generateEmailResponse(
+    scrapedContent,
+    "short",
+    "formal"
+  );
   console.log("Generated Email Response:", generatedResponse);
 
   // Pass the generated response to monitorReplyText and execute it in the content script
@@ -146,8 +150,21 @@ function monitorReplyText(generatedResponse) {
 }
 
 // Function to generate an email response using OpenAI's GPT model
-async function generateEmailResponse(emailContent) {
+async function generateEmailResponse(emailContent, responseType, formalType) {
   const apiKey = "sk-YOURAPIKEY"; // Replace with your actual API key
+
+  const instructions = {
+    short: "Be brief in your response.  Under 100 words.", // Short response
+    long: "Respond in more detail if the context requires. However, do not be overly verbose or repetitive. Write with clarity.", // Long response
+  };
+  const formality = {
+    informal: "Write more informally and personally.",
+    formal: "Write more professionally.",
+  };
+
+  // Select the appropriate token limit based on the responseType
+  const m_instructions = instructions[responseType] || ""; // Default to nothing if not defined
+  const m_formal = formality[formalType] || ""; // Default to nothing if not defined
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -166,7 +183,7 @@ async function generateEmailResponse(emailContent) {
           },
           {
             role: "user",
-            content: `You are Ian Wells. Based on the provided email context, generate an appropriate email response to the following:\n\n${emailContent}`,
+            content: `You are Ian Wells. Based on the provided email context, generate an appropriate email response to the following. ${m_instructions} ${m_formal}:\n\n${emailContent}`,
           },
         ],
         max_tokens: 300,
