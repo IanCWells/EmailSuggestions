@@ -13,7 +13,7 @@ Steps to use:
 
 3. Navigate to chrome://extensions/
 
-4. Click load unpacked and drop in the EmailSuggestions Repo from your lcoal machine
+4. Click load unpacked and drop in the EmailSuggestions Repo from your local machine
 
 5. Navigate to gmail, click on an email thread and use the extension's "gather context" to begin generating responses.
 
