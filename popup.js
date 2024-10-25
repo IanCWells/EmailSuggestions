@@ -12,17 +12,19 @@ document.getElementById("expandButton").addEventListener("click", async () => {
   console.log("Scraped Content:", scrapedContent);
 
   // Generate the email response asynchronously
-  const generatedResponse = await generateEmailResponse(
+  const generatedResponse =
+    "Generating Outline!"; /*await generateEmailResponse(
     scrapedContent,
     "short",
     "formal"
   );
-  console.log("Generated Email Response:", generatedResponse);
+  console.log("Generated Email Response:", generatedResponse);*/
 
   // Pass the generated response to monitorReplyText and execute it in the content script
   await executeScriptAsyncWithArgs(
     tabs[0].id,
     monitorReplyText,
+    scrapedContent,
     generatedResponse
   );
 });
@@ -118,7 +120,69 @@ function scrapeEmailContent() {
 }
 
 // Modified monitorReplyText to accept the generated response
-function monitorReplyText(generatedResponse) {
+async function monitorReplyText(scrapedContent) {
+  //Defining this function locally may not be best practice - but is the quick fix I found to only generate after Outline....
+  async function generateEmailResponse(emailContent, responseType, formalType) {
+    const apiKey = "YOURAPIKEY"; // Replace with your actual API key
+
+    const instructions = {
+      short: "Be brief in your response.  Under 100 words.", // Short response
+      long: "Respond in more detail if the context requires. However, do not be overly verbose or repetitive. Write with clarity.", // Long response
+    };
+    const formality = {
+      informal: "Write more informally and personally.",
+      formal: "Write more professionally.",
+    };
+
+    // Select the appropriate token limit based on the responseType
+    const m_instructions = instructions[responseType] || ""; // Default to nothing if not defined
+    const m_formal = formality[formalType] || ""; // Default to nothing if not defined
+
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are an email assistant. Please generate a professional email response based on the provided context.",
+              },
+              {
+                role: "user",
+                content: `You are Ian Wells. Based on the provided email context, generate an appropriate email response to the following. ${m_instructions} ${m_formal}:\n\n${emailContent}`,
+              },
+            ],
+            max_tokens: 300,
+            temperature: 0.7,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.choices && data.choices.length > 0) {
+        const generatedResponse = data.choices[0].message.content;
+        console.log("Generated Email Response:", generatedResponse);
+        return generatedResponse;
+      } else {
+        console.error("Error: No response from OpenAI API.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error during API call:", error);
+      return null;
+    }
+  }
+
+  let responseInserted = false;
   const observer = new MutationObserver((mutationsList) => {
     mutationsList.forEach((mutation) => {
       if (mutation.addedNodes.length > 0) {
@@ -128,81 +192,41 @@ function monitorReplyText(generatedResponse) {
         if (replyArea) {
           console.log("Reply area detected:", replyArea);
 
-          // Listen for changes in the reply text area
-          replyArea.addEventListener("input", () => {
+          // Asynchronous function to handle input event
+          const handleInput = async () => {
             const replyText = replyArea.innerText.trim();
-            if (replyText === "!outline!" || replyText === "!Outline!") {
-              console.log("Success");
-              // Insert the generated email response into the reply area
-              replyArea.innerText = generatedResponse;
+            if (replyText === "") {
+              responseInserted = false;
             }
+            if (replyText.toLowerCase() === "!outline!" && !responseInserted) {
+              responseInserted = true;
+              replyArea.innerText = "Generating Outline....";
+              console.log("Outline detected. Generating response...");
+
+              // Call the generateEmailResponse function to get the generated response
+
+              const generatedResponse = await generateEmailResponse(
+                scrapedContent,
+                "short" // You can change this to "short", "medium", or "long" based on the need
+              );
+
+              // Insert the generated email response into the reply area
+
+              replyArea.innerText = generatedResponse;
+
+              console.log("Generated response inserted:", generatedResponse);
+            }
+
             console.log("Current reply text:", replyText);
-          });
+          };
+
+          // Add event listener for 'input' on the replyArea
+          replyArea.addEventListener("input", handleInput);
         }
       }
     });
   });
 
-  const config = { childList: true, subtree: true };
-  observer.observe(document.body, config);
-
-  console.log("Monitoring reply button click and reply text area...");
-}
-
-// Function to generate an email response using OpenAI's GPT model
-async function generateEmailResponse(emailContent, responseType, formalType) {
-  const apiKey = "sk-YOURAPIKEY"; // Replace with your actual API key
-
-  const instructions = {
-    short: "Be brief in your response.  Under 100 words.", // Short response
-    long: "Respond in more detail if the context requires. However, do not be overly verbose or repetitive. Write with clarity.", // Long response
-  };
-  const formality = {
-    informal: "Write more informally and personally.",
-    formal: "Write more professionally.",
-  };
-
-  // Select the appropriate token limit based on the responseType
-  const m_instructions = instructions[responseType] || ""; // Default to nothing if not defined
-  const m_formal = formality[formalType] || ""; // Default to nothing if not defined
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an email assistant. Please generate a professional email response based on the provided context.",
-          },
-          {
-            role: "user",
-            content: `You are Ian Wells. Based on the provided email context, generate an appropriate email response to the following. ${m_instructions} ${m_formal}:\n\n${emailContent}`,
-          },
-        ],
-        max_tokens: 300,
-        temperature: 0.7,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (data.choices && data.choices.length > 0) {
-      const generatedResponse = data.choices[0].message.content;
-      console.log("Generated Email Response:", generatedResponse);
-      return generatedResponse;
-    } else {
-      console.error("Error: No response from OpenAI API.");
-      return null;
-    }
-  } catch (error) {
-    console.error("Error during API call:", error);
-    return null;
-  }
+  // Start observing the DOM for changes
+  observer.observe(document.body, { childList: true, subtree: true });
 }
