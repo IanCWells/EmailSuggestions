@@ -30,7 +30,7 @@ https://platform.openai.com/api-keys
 ![Example Usage](https://github.com/user-attachments/assets/488c82b5-7652-43db-a235-27bfa3ac6eee)
 
 Other Commands:
-!outline.short! - Short template.
+!outline.short! - Short template. <br>
 !outline.long!
 !outline.formal! - Formal template. 
 !outline.informal!
