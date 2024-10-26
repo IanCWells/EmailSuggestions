@@ -29,17 +29,14 @@ https://platform.openai.com/api-keys
 
 ![Example Usage](https://github.com/user-attachments/assets/488c82b5-7652-43db-a235-27bfa3ac6eee)
 
-Other Commands:
+Other Commands: <br>
 !outline.short! - Short template. <br>
-!outline.long!
-!outline.formal! - Formal template. 
-!outline.informal!
-
-!outline.short.formal! or any combination of the above.  
-
-!outline: SOME_SPECIAL_INSTRUCTION!
-
-Where SOME_SPECIAL_INSTRUCTION is provides the template additional instructions on how to create an outline.  
+!outline.long! <br>
+!outline.formal! - Formal template. <br>
+!outline.informal! <br>
+!outline.short.formal! or any combination of the above.  <br>
+!outline: SOME_SPECIAL_INSTRUCTION!<br>
+(Where SOME_SPECIAL_INSTRUCTION is provides the template additional instructions on how to create an outline.)
 
 
 
