@@ -1,17 +1,10 @@
 {
-    "manifest_version": 3,
-    "name": "Email Draft Suggestion",
-    "version": "1.0",
-    "permissions": ["activeTab", "storage", "scripting", "tabs"],
-    "description": "A Chrome extension to suggest drafts for email replies.",
-    "action": {
-      "default_popup": "popup.html"
-    },
-    "content_scripts": [
-      {
-        "matches": ["https://mail.google.com/*"],
-        "js": ["popup.js"]
-      }
-    ]
-  }
-  
+  "manifest_version": 3,
+  "name": "Email Suggestions",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["scripting", "tabs"],
+  "host_permissions": ["*://*.google.com/*"]
+}
