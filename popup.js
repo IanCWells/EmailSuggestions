@@ -12,13 +12,7 @@ document.getElementById("expandButton").addEventListener("click", async () => {
   console.log("Scraped Content:", scrapedContent);
 
   // Generate the email response asynchronously
-  const generatedResponse =
-    "Generating Outline!"; /*await generateEmailResponse(
-    scrapedContent,
-    "short",
-    "formal"
-  );
-  console.log("Generated Email Response:", generatedResponse);*/
+  const generatedResponse = "Generating Outline!";
 
   // Pass the generated response to monitorReplyText and execute it in the content script
   await executeScriptAsyncWithArgs(
@@ -116,14 +110,20 @@ function scrapeEmailContent() {
   if (scrapedContent.length === 0) {
     console.error("Error: No email content was found during scraping.");
   }
+
   return scrapedContent;
 }
 
 // Modified monitorReplyText to accept the generated response
 async function monitorReplyText(scrapedContent) {
   //Defining this function locally may not be best practice - but is the quick fix I found to only generate after Outline....
-  async function generateEmailResponse(emailContent, responseType, formalType) {
-    const apiKey = "YOURAPIKEY"; // Replace with your actual API key
+  async function generateEmailResponse(
+    emailContent,
+    responseType,
+    formalType,
+    instruction
+  ) {
+    const apiKey = "APIKEY"; // Replace with your actual API key
 
     const instructions = {
       short: "Be brief in your response.  Under 100 words.", // Short response
@@ -157,7 +157,7 @@ async function monitorReplyText(scrapedContent) {
               },
               {
                 role: "user",
-                content: `You are Ian Wells. Based on the provided email context, generate an appropriate email response to the following. ${m_instructions} ${m_formal}:\n\n${emailContent}`,
+                content: `You are Ian Wells. Based on the provided email context, generate an appropriate email response to the following. ${m_instructions} ${m_formal} ${instruction}:\n\n${emailContent}`,
               },
             ],
             max_tokens: 300,
@@ -192,35 +192,63 @@ async function monitorReplyText(scrapedContent) {
         if (replyArea) {
           console.log("Reply area detected:", replyArea);
 
-          // Asynchronous function to handle input event
-          const handleInput = async () => {
-            const replyText = replyArea.innerText.trim();
-            if (replyText === "") {
-              responseInserted = false;
-            }
-            if (replyText.toLowerCase() === "!outline!" && !responseInserted) {
-              responseInserted = true;
-              replyArea.innerText = "Generating Outline....";
-              console.log("Outline detected. Generating response...");
-
-              // Call the generateEmailResponse function to get the generated response
-
-              const generatedResponse = await generateEmailResponse(
-                scrapedContent,
-                "short" // You can change this to "short", "medium", or "long" based on the need
-              );
-
-              // Insert the generated email response into the reply area
-
-              replyArea.innerText = generatedResponse;
-
-              console.log("Generated response inserted:", generatedResponse);
-            }
-
-            console.log("Current reply text:", replyText);
+          // Helper function to insert the outline message
+          const setGeneratingOutline = () => {
+            responseInserted = true;
+            replyArea.innerText = "Generating Outline....";
           };
 
-          // Add event listener for 'input' on the replyArea
+          // Command map for different reply texts and response lengths
+          //This needs to be updated and made more efficient
+          const commandMap = {
+            "!outline!": ["short", "formal"],
+            "!outline.short!": ["short", "formal"],
+            "!outline.long!": ["long", "formal"],
+            "!outline.formal!": ["short", "formal"],
+            "!outline.informal!": ["short", "informal"],
+            "!outline.short.informal!": ["short", "informal"],
+            "!outline.long.informal!": ["long", "informal"],
+            "!outline.short.formal!": ["short", "formal"],
+            "!outline.long.formal!": ["long", "formal"],
+            "!outline.informal.short!": ["short", "informal"],
+            "!outline.informal.long!": ["long", "informal"],
+            "!outline.formal.short!": ["short", "formal"],
+            "!outline.formal.long!": ["long", "formal"],
+          };
+
+          // Defaults
+          let response_length = "short";
+          let response_formality = "formal";
+          let specialInstruction = "";
+          const handleInput = async () => {
+            const replyText = replyArea.innerText.trim();
+            if (!replyText) {
+              responseInserted = false;
+            }
+            const outlineRegex = /^!outline:\s*(.*)!$/i;
+            const match = replyText.match(outlineRegex);
+            if (
+              (!responseInserted &&
+                commandMap.hasOwnProperty(replyText.toLowerCase())) ||
+              match
+            ) {
+              setGeneratingOutline();
+              if (match) {
+                specialInstruction = match;
+              } else {
+                response_length = commandMap[replyText.toLowerCase()][0];
+                response_formality = commandMap[replyText.toLowerCase()][1];
+              }
+              console.log(specialInstruction);
+              let generatedResponse = await generateEmailResponse(
+                scrapedContent,
+                response_length,
+                response_formality,
+                specialInstruction
+              );
+              replyArea.innerText = generatedResponse;
+            }
+          };
           replyArea.addEventListener("input", handleInput);
         }
       }
