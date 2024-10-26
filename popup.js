@@ -27,8 +27,6 @@ async function handleExpandButtonClick() {
       tabs[0].id,
       scrapeEmailContent
     );
-    console.log("Scraped Content:", scrapedContent);
-
     const generatedResponse = "Generating Outline!";
     await executeScriptAsyncWithArgs(
       tabs[0].id,

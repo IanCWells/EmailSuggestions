@@ -7,6 +7,7 @@ export async function monitorReplyText(scrapedContent) {
     instruction
   ) {
     const apiKey = "YOURAPIKEY"; // Replace with your actual API key
+    const user = "YOURNAME";
 
     const instructions = {
       short: "Be brief in your response.  Under 100 words.", // Short response
@@ -40,7 +41,7 @@ export async function monitorReplyText(scrapedContent) {
               },
               {
                 role: "user",
-                content: `You are Ian Wells. Based on the provided email context, generate an appropriate email response to the following. ${m_instructions} ${m_formal} ${instruction}:\n\n${emailContent}`,
+                content: `You are ${user}. Based on the provided email context, generate an appropriate email response to the following. ${m_instructions} ${m_formal} ${instruction}:\n\n${emailContent}`,
               },
             ],
             max_tokens: 300,
@@ -117,6 +118,7 @@ export async function monitorReplyText(scrapedContent) {
               if (match) {
                 specialInstruction = match;
               } else {
+                specialInstruction = "";
                 response_length = commandMap[replyText.toLowerCase()][0];
                 response_formality = commandMap[replyText.toLowerCase()][1];
               }
