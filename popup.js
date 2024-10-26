@@ -1,26 +1,33 @@
-document.getElementById("expandButton").addEventListener("click", async () => {
-  const tabs = await getActiveTab();
+document.addEventListener("DOMContentLoaded", async () => {
+  const expandButton = document.getElementById("expandButton");
+  if (expandButton) {
+    expandButton.addEventListener("click", async () => {
+      const tabs = await getActiveTab();
 
-  // First execute the expand function
-  await executeScriptAsync(tabs[0].id, clickExpandAll);
+      // First execute the expand function
+      await executeScriptAsync(tabs[0].id, clickExpandAll);
 
-  // Then execute the email scraping function after expansion
-  const scrapedContent = await executeScriptAsync(
-    tabs[0].id,
-    scrapeEmailContent
-  );
-  console.log("Scraped Content:", scrapedContent);
+      // Then execute the email scraping function after expansion
+      const scrapedContent = await executeScriptAsync(
+        tabs[0].id,
+        scrapeEmailContent
+      );
+      console.log("Scraped Content:", scrapedContent);
 
-  // Generate the email response asynchronously
-  const generatedResponse = "Generating Outline!";
+      // Generate the email response asynchronously
+      const generatedResponse = "Generating Outline!";
 
-  // Pass the generated response to monitorReplyText and execute it in the content script
-  await executeScriptAsyncWithArgs(
-    tabs[0].id,
-    monitorReplyText,
-    scrapedContent,
-    generatedResponse
-  );
+      // Pass the generated response to monitorReplyText and execute it in the content script
+      await executeScriptAsyncWithArgs(
+        tabs[0].id,
+        monitorReplyText,
+        scrapedContent,
+        generatedResponse
+      );
+    });
+  } else {
+    console.error("Element with id 'expandButton' not found.");
+  }
 });
 
 // Helper function to get the active tab using async/await
@@ -106,6 +113,7 @@ function scrapeEmailContent() {
 
   const scrapedContent = emailText.join("\n");
   console.log("Extracted Email Content!");
+  console.log(scrapedContent);
 
   if (scrapedContent.length === 0) {
     console.error("Error: No email content was found during scraping.");
@@ -123,7 +131,7 @@ async function monitorReplyText(scrapedContent) {
     formalType,
     instruction
   ) {
-    const apiKey = "APIKEY"; // Replace with your actual API key
+    const apiKey = "YOUR_API_KEY"; // Replace with your actual API key
 
     const instructions = {
       short: "Be brief in your response.  Under 100 words.", // Short response
@@ -190,8 +198,6 @@ async function monitorReplyText(scrapedContent) {
         const replyArea = document.querySelector("[contenteditable='true']");
 
         if (replyArea) {
-          console.log("Reply area detected:", replyArea);
-
           // Helper function to insert the outline message
           const setGeneratingOutline = () => {
             responseInserted = true;
