@@ -36,7 +36,7 @@ Other Commands: <br>
 !outline.informal! <br>
 !outline.short.formal! or any combination of the above.  <br>
 !outline: SOME_SPECIAL_INSTRUCTION!<br>
-(Where SOME_SPECIAL_INSTRUCTION is provides the template additional instructions on how to create an outline.)
+(Where SOME_SPECIAL_INSTRUCTION provides additional instructions on outline preferences.)
 
 ![Screen Recording 2024-10-26 at 1 13 56 PM](https://github.com/user-attachments/assets/dbd844d6-acb3-4e29-bcd7-721aa13ab002)
 
