@@ -1,8 +1,6 @@
 # EmailSuggestions
 
-Chrome Extension for Writing Quick Email Suggestions
-Gmail Compatible
-
+Chrome Extension for Writing Gmail Suggestions
 Powered by OpenAI's ChatGPT
 
 Steps to use:
