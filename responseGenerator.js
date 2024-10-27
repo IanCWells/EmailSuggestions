@@ -1,5 +1,6 @@
 export async function monitorReplyText(scrapedContent) {
   //Defining this function locally may not be best practice - but is the quick fix I found to only generate after Outline....
+  let generateFlag = false;
   async function generateEmailResponse(
     emailContent,
     responseType,
@@ -41,7 +42,7 @@ export async function monitorReplyText(scrapedContent) {
               },
               {
                 role: "user",
-                content: `You are ${user}. Based on the provided email context, generate an appropriate email response to the following. ${m_instructions} ${m_formal} ${instruction}:\n\n${emailContent}`,
+                content: `You are ${user}. Start each email with Hi, addressed to the other entity involved with communication (NOT ${user}). End the email  with Best/Sincerely, \n ${user}.  Based on the provided email context, generate an appropriate email response to the following. ${m_instructions} ${m_formal} ${instruction}:\n\n${emailContent}`,
               },
             ],
             max_tokens: 300,
@@ -129,15 +130,17 @@ export async function monitorReplyText(scrapedContent) {
                 response_formality,
                 specialInstruction
               );
+
               replyArea.innerText = generatedResponse;
+              generateFlag = true;
             }
           };
+          //This should turn off when the expand button is clicked
           replyArea.addEventListener("input", handleInput);
         }
       }
     });
   });
-
   // Start observing the DOM for changes
   observer.observe(document.body, { childList: true, subtree: true });
 }

@@ -7,6 +7,8 @@ import {
 import { clickExpandAll, scrapeEmailContent } from "./contentScripts.js";
 import { monitorReplyText } from "./responseGenerator.js";
 
+window.generateFlag = true;
+
 document.addEventListener("DOMContentLoaded", initializeExpandButtonListener);
 
 function initializeExpandButtonListener() {
@@ -20,20 +22,24 @@ function initializeExpandButtonListener() {
 
 async function handleExpandButtonClick() {
   try {
-    const tabs = await getActiveTab();
+    let tabs = await getActiveTab();
     await executeScriptAsync(tabs[0].id, clickExpandAll);
 
-    const scrapedContent = await executeScriptAsync(
+    let scrapedContent = await executeScriptAsync(
       tabs[0].id,
       scrapeEmailContent
     );
-    const generatedResponse = "Generating Outline!";
-    await executeScriptAsyncWithArgs(
-      tabs[0].id,
-      monitorReplyText,
-      scrapedContent,
-      generatedResponse
-    );
+    console.log(scrapedContent);
+    if (scrapedContent === "***") {
+    } else {
+      const generatedResponse = "Generating Outline!";
+      await executeScriptAsyncWithArgs(
+        tabs[0].id,
+        monitorReplyText,
+        scrapedContent,
+        generatedResponse
+      );
+    }
   } catch (error) {
     console.error("Error handling expand button click:", error);
   }

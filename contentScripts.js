@@ -20,6 +20,7 @@ export function scrapeEmailContent() {
   const scrapedContent = emailText.join("\n");
   if (scrapedContent.length === 0) {
     console.error("Error: No email content was found during scraping.");
+    return "***";
   }
   return scrapedContent;
 }
